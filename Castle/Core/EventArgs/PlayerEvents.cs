@@ -136,7 +136,7 @@ namespace Castle.Core.EventArgs
             {
                 if (TryGetLookPlayer(ev.Player, 2f, out Exiled.API.Features.Player player, out RaycastHit? hit))
                 {
-                    if (ev.Player != player && !HumanMeleeCooldown.Contains(ev.Player))
+                    if (ev.Player != player && !HumanMeleeCooldown.Contains(ev.Player) && ev.Player.Items.Count() > 0 && player.Items.Count() > 0)
                     {
                         float damageCalcu(string pos)
                         {
