@@ -45,7 +45,7 @@ namespace Castle.Core.EventArgs
             yield return Timing.WaitForSeconds(1);
 
             ev.Player.Position = GameObject.Find("[SpawnPoint] Start").transform.position;
-            ev.Player.EnableEffect(EffectType.Ensnared, 5);
+            ev.Player.EnableEffect(EffectType.Ensnared, 1, 5);
             ev.Player.IsGodModeEnabled = true;
 
             yield return Timing.WaitForSeconds(5);
