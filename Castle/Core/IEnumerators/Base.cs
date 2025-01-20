@@ -75,7 +75,7 @@ namespace Castle.Core.IEnumerators
                 {
                     Item item = Item.Create(EnumToList<ItemType>().GetRandomValue());
 
-                    item.CreatePickup(new Vector3(Random.Range(-45, 42), Random.Range(2019, 2001), Random.Range(0, 254)));
+                    item.CreatePickup(new Vector3(Random.Range(-45, 42), Random.Range(2019, 2001), Random.Range(0, 254)), new Quaternion(Random.Range(0, 180), Random.Range(0, 180), Random.Range(0, 180), Random.Range(0, 180)));
                 }
                 catch { }
 
