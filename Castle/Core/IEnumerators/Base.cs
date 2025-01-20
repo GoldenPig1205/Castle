@@ -79,7 +79,7 @@ namespace Castle.Core.IEnumerators
                 }
                 catch { }
 
-                yield return Timing.WaitForSeconds(Random.Range(1, 5));
+                yield return Timing.WaitForSeconds(1);
             }
         }
 
@@ -105,6 +105,9 @@ namespace Castle.Core.IEnumerators
 
 지루하신가요? 그럼 랜덤한 아이템을 맵 곳곳에 스폰시켜드릴게요.
 1시간(실제 시간으로는 2분)마다 맵을 대신 청소해 드립니다. 행운을 빌어요!
+
+[ALT]ㅣ근접 공격
+친목, 닉언 규정에 영향을 받지 않음
 </size>
 
 

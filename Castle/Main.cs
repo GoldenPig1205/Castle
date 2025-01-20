@@ -28,6 +28,8 @@ namespace Castle
             Exiled.Events.Handlers.Player.Spawned += OnSpawned;
             Exiled.Events.Handlers.Player.Died += OnDied;
             Exiled.Events.Handlers.Player.InteractingDoor += OnInteractingDoor;
+            Exiled.Events.Handlers.Player.TogglingNoClip += OnTogglingNoClip;
+            Exiled.Events.Handlers.Player.ChangedEmotion += OnChangedEmotion;
         }
 
         public override void OnDisabled()
@@ -41,6 +43,8 @@ namespace Castle
             Exiled.Events.Handlers.Player.Spawned -= OnSpawned;
             Exiled.Events.Handlers.Player.Died -= OnDied;
             Exiled.Events.Handlers.Player.InteractingDoor -= OnInteractingDoor;
+            Exiled.Events.Handlers.Player.TogglingNoClip -= OnTogglingNoClip;
+            Exiled.Events.Handlers.Player.ChangedEmotion -= OnChangedEmotion;
 
             base.OnDisabled();
             Instance = null;

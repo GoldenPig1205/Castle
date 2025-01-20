@@ -1,24 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Exiled.API.Features;
-using Exiled.Events.EventArgs;
-using MapEditorReborn.API.Features;
 using UnityEngine;
 using MEC;
-using InventorySystem.Configs;
 using Exiled.Events.EventArgs.Player;
 using Exiled.API.Enums;
-using Exiled.Events.Handlers;
-using PlayerRoles;
 
 using static Castle.Core.Variables.Base;
 
 using static Castle.Core.Functions.Base;
+
 using Interactables.Interobjects.DoorUtils;
+using Exiled.API.Features.DamageHandlers;
+using DiscordInteraction.API.DataBases;
 using Exiled.API.Extensions;
+using Mirror;
+using PluginAPI.Core;
+using MultiBroadcast.API;
+using PlayerRoles.FirstPersonControl.Thirdperson.Subcontrollers;
 
 namespace Castle.Core.EventArgs
 {
@@ -42,8 +40,12 @@ namespace Castle.Core.EventArgs
                 speaker.transform.localPosition = Vector3.zero;
             });
 
-            ev.Player.Role.Set(EnumToList<RoleTypeId>().Where(x => x.IsHuman()).GetRandomValue());
-            ev.Player.ClearInventory();
+            Spawn(ev.Player);
+
+            Timing.CallDelayed(1, () =>
+            {
+                ev.Player.Position = GameObject.Find("[SpawnPoint] Start").transform.position;
+            });
         }
 
         public static void OnLeft(LeftEventArgs ev)
@@ -54,14 +56,19 @@ namespace Castle.Core.EventArgs
         {
             if (ev.Player.IsAlive)
             {
-                ev.Player.Position = GameObject.Find("[SpawnPoint] Start").transform.position;
-                ev.Player.EnableEffect(EffectType.FogControl, 1);
-                ev.Player.EnableEffect(EffectType.SoundtrackMute);
-                ev.Player.EnableEffect(EffectType.SilentWalk, 8);
+                Timing.CallDelayed(Timing.WaitForOneFrame, () =>
+                {
+                    Vector3 pos = SpawnPoints.Select(x => x.transform.position).GetRandomValue();
 
-                int intensity = CalculateIntensity(Hour);
+                    ev.Player.Position = new Vector3(pos.x, pos.y + 2, pos.z);
+                    ev.Player.EnableEffect(EffectType.FogControl, 1);
+                    ev.Player.EnableEffect(EffectType.SoundtrackMute);
+                    ev.Player.EnableEffect(EffectType.SilentWalk, 8);
 
-                ev.Player.EnableEffect(EffectType.Blinded, (byte)intensity);
+                    int intensity = CalculateIntensity(Hour);
+
+                    ev.Player.EnableEffect(EffectType.Blinded, (byte)intensity);
+                });
             }
         }
 
@@ -74,8 +81,17 @@ namespace Castle.Core.EventArgs
                 yield return Timing.WaitForSeconds(1);
             }
 
-            ev.Player.Role.Set(EnumToList<RoleTypeId>().Where(x => x.IsHuman()).GetRandomValue());
-            ev.Player.ClearInventory();
+            string MessageFormat()
+            {
+                if (ev.Attacker == null)
+                    return $"💀 <color=#A4A4A4>자살</color>ㅣ{BadgeFormat(ev.Player)}<color=#F2F5A9>{ev.Player.DisplayNickname}</color>(<color={ev.TargetOldRole.GetColor().ToHex()}>{Trans.Role[ev.TargetOldRole]}</color>) - {ev.DamageHandler.Type}";
+                else
+                    return $"💔 <color=#FAAC58>{(ev.Player.IsCuffed ? "<b>체포킬</b>(신고 가능 여부는 규칙 확인)" : "사살")}</color>ㅣ{BadgeFormat(ev.Attacker)}<color=#F2F5A9>{ev.Attacker.DisplayNickname}</color>(<color={ev.Attacker.Role.Color.ToHex()}>{Trans.Role[ev.Attacker.Role.Type]}</color>) -> {BadgeFormat(ev.Player)}<color=#F2F5A9>{ev.Player.DisplayNickname}</color>(<color={ev.TargetOldRole.GetColor().ToHex()}>{Trans.Role[ev.TargetOldRole]}</color>) - {ev.DamageHandler.Type}";
+            }
+            foreach (var player in Exiled.API.Features.Player.List.Where(x => x.IsDead || x == ev.Attacker))
+                player.AddBroadcast(10, $"<size=20>{MessageFormat()}</size>");
+
+            Spawn(ev.Player);
         }
 
         public static void OnInteractingDoor(InteractingDoorEventArgs ev)
@@ -94,6 +110,81 @@ namespace Castle.Core.EventArgs
                             ev.Player.IsBypassModeEnabled = false;
                     }
                 });
+            }
+        }
+
+        public static IEnumerator<float> OnTogglingNoClip(TogglingNoClipEventArgs ev)
+        {
+            if (ev.Player.IsHuman && !ev.Player.IsCuffed)
+            {
+                if (TryGetLookPlayer(ev.Player, 2f, out Exiled.API.Features.Player player, out RaycastHit? hit))
+                {
+                    if (ev.Player != player && !HumanMeleeCooldown.Contains(ev.Player))
+                    {
+                        float damageCalcu(string pos)
+                        {
+                            switch (pos)
+                            {
+                                case "Head":
+                                    return 24.1f;
+
+                                case "Chest":
+                                    return 14f;
+
+                                default:
+                                    return 12.5f;
+                            }
+                        }
+
+                        float damage = damageCalcu(hit.Value.transform.name);
+
+                        ev.Player.ShowHitMarker(damage / 14);
+                        player.Hurt(ev.Player, damage, DamageType.Custom, new DamageHandlerBase.CassieAnnouncement(null) { Announcement = null }, "무지성으로 뚜드려 맞았습니다.");
+
+                        HumanMeleeCooldown.Add(ev.Player);
+
+                        yield return Timing.WaitForSeconds(1);
+
+                        HumanMeleeCooldown.Remove(ev.Player);
+                    }
+                }
+            }
+        }
+
+        public static void OnChangedEmotion(ChangedEmotionEventArgs ev)
+        {
+            if (!EmotionCooldown.Contains(ev.Player))
+            {
+                EmotionCooldown.Add(ev.Player);
+
+                EmotionPresetType type = ev.EmotionPresetType;
+
+                if (type == EmotionPresetType.Neutral)
+                    return;
+
+                string emotion()
+                {
+                    if (type == EmotionPresetType.Happy)
+                        return "행복한 표정을 짓고 있습니다";
+
+                    else if (type == EmotionPresetType.AwkwardSmile)
+                        return "뒤틀린 미소를 짓고 있습니다";
+
+                    else if (type == EmotionPresetType.Scared)
+                        return "두려운 표정을 짓고 있습니다";
+
+                    else if (type == EmotionPresetType.Angry)
+                        return "화가난 표정을 짓고 있습니다";
+
+                    else if (type == EmotionPresetType.Chad)
+                        return "꼭 채드처럼 보이는군요";
+
+                    else
+                        return "꼭 오우거같이 보이는군요";
+                }
+
+                foreach (var player in Exiled.API.Features.Player.List.Where(x => x.IsDead || Vector3.Distance(x.Position, ev.Player.Position) < 11))
+                    player.AddBroadcast(5, $"<size=20>{BadgeFormat(ev.Player)}<color={ev.Player.Role.Color.ToHex()}>{ev.Player.DisplayNickname}</color>(은)는 {emotion()}.</size>");
             }
         }
     }

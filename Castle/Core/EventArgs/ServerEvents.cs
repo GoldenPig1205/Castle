@@ -11,10 +11,12 @@ using MEC;
 using InventorySystem.Configs;
 
 using static Castle.Core.IEnumerators.Base;
-
+using static Castle.Core.Functions.Base;
 using static Castle.Core.Variables.Base;
 using Respawning;
 using Exiled.Events.EventArgs.Server;
+using System.Xml.Linq;
+using MapEditorReborn.API.Features.Objects;
 
 namespace Castle.Core.EventArgs
 {
@@ -38,6 +40,7 @@ namespace Castle.Core.EventArgs
             {
                 Speaker speaker = p.AddSpeaker("Main", isSpatial: false, maxDistance: 5000);
             });
+            SpawnPoints = GameObject.FindObjectsOfType<Transform>().Where(t => t.name.Contains("стул")).Select(x => x.gameObject).ToList();
 
             InventoryLimits.StandardCategoryLimits[ItemCategory.SpecialWeapon] = 8;
             InventoryLimits.StandardCategoryLimits[ItemCategory.SCPItem] = 8;
@@ -52,7 +55,7 @@ namespace Castle.Core.EventArgs
 
         public static void OnRoundStarted()
         {
-
+            
         }
 
         public static void OnRoundEnded(RoundEndedEventArgs ev)
