@@ -33,6 +33,7 @@ namespace Castle.Core.EventArgs
             foreach (var spawn in WaveManager.Waves) spawn.Destroy();
             Round.IsLocked = true;
             Round.Start();
+            Server.FriendlyFire = true;
             Server.ExecuteCommand($"/mp load Castle");
 
             foreach (var _audioClip in System.IO.Directory.GetFiles(Paths.Configs + "/Castle/BGM/"))
@@ -53,10 +54,6 @@ namespace Castle.Core.EventArgs
             Timing.RunCoroutine(InputCooldown());
             Timing.RunCoroutine(ItemSpawner());
             Timing.RunCoroutine(MessagePlatform());
-
-            Harmony harmony = new Harmony($"FriendlyFire - {DateTime.Now.Ticks}");
-            harmony.Patch(AccessTools.Method(typeof(HitboxIdentity), nameof(HitboxIdentity.IsEnemy), [typeof(Team), typeof(Team)]),
-                postfix: new HarmonyMethod(AccessTools.Method(typeof(HitboxPatchPostfix), nameof(HitboxPatchPostfix.Postfix))));
         }
 
         public static void OnRoundStarted()

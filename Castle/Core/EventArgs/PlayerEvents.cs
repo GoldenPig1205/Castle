@@ -77,6 +77,18 @@ namespace Castle.Core.EventArgs
             }
         }
 
+        public static void OnHurting(HurtingEventArgs ev)
+        {
+            if (ev.Attacker != null)
+            {
+                if (ev.Player.Items.Count() < 1)
+                {
+                    Log.Info(ev.Player.Items.Count().ToString());
+                    ev.IsAllowed = false;
+                }
+            }
+        }
+
         public static IEnumerator<float> OnDied(DiedEventArgs ev)
         {
             for (int i = 0; i < 5; i++)
@@ -144,7 +156,7 @@ namespace Castle.Core.EventArgs
                         float damage = damageCalcu(hit.Value.transform.name);
 
                         ev.Player.ShowHitMarker(damage / 14);
-                        player.Hurt(ev.Player, damage, DamageType.Custom, new DamageHandlerBase.CassieAnnouncement(null) { Announcement = null }, "무지성으로 뚜드려 맞았습니다.");
+                        player.Hurt(ev.Player, damage, DamageType.Custom, new DamageHandlerBase.CassieAnnouncement("") { Announcement = null, SubtitleParts = null }, "무지성으로 뚜드려 맞았습니다.");
 
                         HumanMeleeCooldown.Add(ev.Player);
 
