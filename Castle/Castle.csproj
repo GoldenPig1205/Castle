@@ -2,6 +2,7 @@
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
+    <LangVersion>12.0</LangVersion>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{C84A3207-8C3E-4830-9A1F-E60570697F99}</ProjectGuid>
@@ -20,7 +21,8 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <WarningLevel>5</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -31,6 +33,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>..\..\..\SCPSL\14.0\SCPSL_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+    </Reference>
     <Reference Include="Assembly-CSharp-Publicized">
       <HintPath>..\..\..\SCPSL\14.0\SCPSL_Data\Managed\Assembly-CSharp-Publicized.dll</HintPath>
     </Reference>
@@ -39,6 +44,9 @@
     </Reference>
     <Reference Include="CommandSystem.Core">
       <HintPath>..\..\..\SCPSL\14.0\SCPSL_Data\Managed\CommandSystem.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DiscordInteraction">
+      <HintPath>C:\Users\GoldenPig1205\AppData\Roaming\EXILED\Plugins\DiscordInteraction.dll</HintPath>
     </Reference>
     <Reference Include="Exiled.API">
       <HintPath>C:\Users\GoldenPig1205\AppData\Roaming\EXILED\Plugins\dependencies\Exiled.API.dll</HintPath>
@@ -73,6 +81,10 @@
     <Reference Include="NVorbis">
       <HintPath>C:\Users\GoldenPig1205\AppData\Roaming\EXILED\Plugins\dependencies\NVorbis.dll</HintPath>
     </Reference>
+    <Reference Include="PluginAPI, Version=13.1.5.0, Culture=neutral, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\SCPSL\14.0\SCPSL_Data\Managed\PluginAPI.dll</HintPath>
+    </Reference>
     <Reference Include="Pooling">
       <HintPath>..\..\..\SCPSL\14.0\SCPSL_Data\Managed\Pooling.dll</HintPath>
     </Reference>
@@ -98,8 +110,21 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\Commands\ClientCommands\basicfeatures\Chat.cs" />
+    <Compile Include="Core\Commands\ClientCommands\basicfeatures\Emotion.cs" />
+    <Compile Include="Core\Configs\Config.cs" />
+    <Compile Include="Core\EventArgs\MapEvents.cs" />
+    <Compile Include="Core\EventArgs\PlayerEvents.cs" />
+    <Compile Include="Core\EventArgs\ServerEvents.cs" />
+    <Compile Include="Core\Functions\Base.cs" />
+    <Compile Include="Core\IEnumerators\Base.cs" />
+    <Compile Include="Core\Variables\Base.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
