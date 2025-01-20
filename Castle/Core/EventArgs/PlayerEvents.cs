@@ -79,14 +79,8 @@ namespace Castle.Core.EventArgs
 
         public static void OnHurting(HurtingEventArgs ev)
         {
-            if (ev.Attacker != null)
-            {
-                if (ev.Player.Items.Count() < 1)
-                {
-                    Log.Info(ev.Player.Items.Count().ToString());
-                    ev.IsAllowed = false;
-                }
-            }
+            if (GodModePlayers.Contains(ev.Player))
+                ev.IsAllowed = false;
         }
 
         public static IEnumerator<float> OnDied(DiedEventArgs ev)
@@ -136,7 +130,7 @@ namespace Castle.Core.EventArgs
             {
                 if (TryGetLookPlayer(ev.Player, 2f, out Exiled.API.Features.Player player, out RaycastHit? hit))
                 {
-                    if (ev.Player != player && !HumanMeleeCooldown.Contains(ev.Player) && ev.Player.Items.Count() > 0 && player.Items.Count() > 0)
+                    if (ev.Player != player && !HumanMeleeCooldown.Contains(ev.Player) && !GodModePlayers.Contains(player))
                     {
                         float damageCalcu(string pos)
                         {

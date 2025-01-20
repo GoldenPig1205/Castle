@@ -14,6 +14,10 @@ using Exiled.API.Extensions;
 using PlayerRoles;
 using Exiled.API.Features.Items;
 using Exiled.API.Features.Doors;
+using Exiled.API.Features.Roles;
+using Exiled.Events.Commands.Hub;
+using PlayerRoles.FirstPersonControl;
+using RelativePositioning;
 
 namespace Castle.Core.IEnumerators
 {
@@ -83,7 +87,7 @@ namespace Castle.Core.IEnumerators
             }
         }
 
-        public static IEnumerator<float> MessagePlatform()
+        public static IEnumerator<float> Platform()
         {
             while (true)
             {
@@ -91,10 +95,11 @@ namespace Castle.Core.IEnumerators
                 {
                     if (Physics.Raycast(player.Position, Vector3.down, out RaycastHit hit, 3, (LayerMask)1))
                     {
-                        switch (hit.transform.name) 
-                        { 
-                            case "[Platform] Start":
-                                player.ShowHint($"""
+                        string name = hit.transform.name;
+
+                        if (name == "[Platform] Start")
+                        {
+                            player.ShowHint($"""
 <b><size=60>Welcome to <color=#F5D0A9>만남의 광장</color>!</size></b>
 
 <size=20>
@@ -104,7 +109,7 @@ namespace Castle.Core.IEnumerators
 또한, 콘솔(` 또는 ~)을 열고 [.help] 명령어를 입력하여 사용할 수 있는 명령어에 대한 도움말을 확인할 수 있어요.
 
 지루하신가요? 그럼 랜덤한 아이템을 맵 곳곳에 스폰시켜드릴게요.
-또한, 팀킬도 가능합니다. 단, 상대가 아이템을 하나 이상 가진 상태여야 합니다.
+또한, 팀킬도 가능합니다. 단, 상대가 <b><color=#F5ECCE>평화 구역</color></b>에 있으면 팀킬이 불가능합니다.
 1시간(실제 시간으로는 2분)마다 맵을 대신 청소해 드립니다. 행운을 빌어요!
 
 [ALT]ㅣ근접 공격
@@ -113,13 +118,23 @@ namespace Castle.Core.IEnumerators
 
 
 """, 1.2f);
-                                break;
-
-                            case "[Platform] Hidden":
-                                player.ShowHint($"어떻게 하면 더 멀리 바라볼 수 있을까?");
-                                break;
                         }
-                        
+                        else if (name == "[Platform] Hidden")
+                        {
+                            player.ShowHint($"어떻게 하면 더 멀리 바라볼 수 있을까?", 1.2f);
+                        }
+                        else if (name == "Peace")
+                        {
+                            if (!GodModePlayers.Contains(player))
+                                GodModePlayers.Add(player);
+
+                            player.ShowHint($"이 지역은 <b><color=#F5ECCE>평화 구역</color></b>입니다. 무적이 적용됩니다.", 1.2f);
+                        }
+                        else
+                        {
+                            if (GodModePlayers.Contains(player))
+                                GodModePlayers.Remove(player);
+                        }
                     }
                 }
 
