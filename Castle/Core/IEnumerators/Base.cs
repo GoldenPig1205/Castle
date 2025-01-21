@@ -18,6 +18,7 @@ using Exiled.API.Features.Roles;
 using Exiled.Events.Commands.Hub;
 using PlayerRoles.FirstPersonControl;
 using RelativePositioning;
+using Exiled.API.Features.Pickups;
 
 namespace Castle.Core.IEnumerators
 {
@@ -80,15 +81,21 @@ namespace Castle.Core.IEnumerators
                     switch (Random.Range(1, 4)) 
                     {
                         case 1:
-                            Item coin = Item.Create(ItemType.Coin);
+                            for (int i = 0; i < Random.Range(1, 3); i++)
+                            {
+                                Item coin = Item.Create(ItemType.Coin);
 
-                            coin.CreatePickup(new Vector3(Random.Range(-45, 42), Random.Range(2019, 2001), Random.Range(0, 254)), new Quaternion(Random.Range(0, 180), Random.Range(0, 180), Random.Range(0, 180), Random.Range(0, 180)));
+                                coin.CreatePickup(new Vector3(Random.Range(-45, 42), Random.Range(2019, 2001), Random.Range(0, 254)), new Quaternion(Random.Range(0, 180), Random.Range(0, 180), Random.Range(0, 180), Random.Range(0, 180)));
+                            }
                             break;
 
                         case 2:
-                            Item ammo = Item.Create(EnumToList<ItemType>().GetRandomValue(x => x.IsAmmo()));
+                            for (int i = 0; i < Random.Range(2, 3); i++)
+                            {
+                                Item ammo = Item.Create(EnumToList<ItemType>().GetRandomValue(x => x.IsAmmo()));
 
-                            ammo.CreatePickup(new Vector3(Random.Range(-45, 42), Random.Range(2019, 2001), Random.Range(0, 254)), new Quaternion(Random.Range(0, 180), Random.Range(0, 180), Random.Range(0, 180), Random.Range(0, 180)));
+                                ammo.CreatePickup(new Vector3(Random.Range(-45, 42), Random.Range(2019, 2001), Random.Range(0, 254)), new Quaternion(Random.Range(0, 180), Random.Range(0, 180), Random.Range(0, 180), Random.Range(0, 180)));
+                            }
                             break;
 
                         case 3:
@@ -149,24 +156,18 @@ Plugin Create by @goldenpig1205
                         }
                         else if (name == "Peace")
                         {
-                            if (!GodModePlayers.Contains(player))
-                                GodModePlayers.Add(player);
-
                             player.ShowHint($"이 지역은 <b><color=#F5ECCE>평화 구역</color></b>입니다. 무적이 적용됩니다.", 1.2f);
                         }
                         else if (name == "Shop")
                         {
-                            if (!GodModePlayers.Contains(player))
-                                GodModePlayers.Add(player);
-
-                            player.ShowHint($"이 건물은 <b><color=#FE642E>상점</color></b>입니다. 무적이 적용됩니다.", 1.2f);
+                            player.ShowHint($"이 건물은 <b><color=#FE642E>상점</color></b>입니다. [.구매] 명령어를 사용해보세요.", 1.2f);
                         }
                         else if (name == "Church")
                         {
                             if (!GodModePlayers.Contains(player))
                                 GodModePlayers.Add(player);
 
-                            player.ShowHint($"이 건물은 <b><color=#BDBDBD>교회</color></b>입니다. 무적이 적용됩니다.", 1.2f);
+                            player.ShowHint($"이 건물은 <b><color=#BDBDBD>교회</color></b>입니다. 신성한 곳에서는 싸움을 금합니다.", 1.2f);
                         }
                         else
                         {
