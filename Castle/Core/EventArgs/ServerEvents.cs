@@ -30,7 +30,7 @@ namespace Castle.Core.EventArgs
             yield return Timing.WaitForSeconds(1);
 
             Map.IsDecontaminationEnabled = false;
-            foreach (var spawn in WaveManager.Waves) spawn.Destroy();
+            Respawn.PauseWaves();
             Round.IsLocked = true;
             Round.Start();
             Server.FriendlyFire = true;
