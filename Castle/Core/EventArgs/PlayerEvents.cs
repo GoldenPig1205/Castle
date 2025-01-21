@@ -24,8 +24,6 @@ namespace Castle.Core.EventArgs
     {
         public static IEnumerator<float> OnVerified(VerifiedEventArgs ev)
         {
-            Coins.Add(ev.Player, 0);
-
             yield return Timing.WaitForSeconds(1);
 
             AudioPlayer audioPlayer = AudioPlayer.CreateOrGet($"Player - {ev.Player.UserId}", condition: (hub) =>
@@ -57,7 +55,6 @@ namespace Castle.Core.EventArgs
 
         public static void OnLeft(LeftEventArgs ev)
         {
-            Coins.Remove(ev.Player);
         }
 
         public static void OnSpawned(SpawnedEventArgs ev)
@@ -88,14 +85,15 @@ namespace Castle.Core.EventArgs
 
         public static void OnHurting(HurtingEventArgs ev)
         {
-            if (GodModePlayers.Contains(ev.Player))
+            if (ev.Attacker == null)
+                return;
+
+            if (GodModePlayers.Contains(ev.Attacker) || GodModePlayers.Contains(ev.Player))
                 ev.IsAllowed = false;
         }
 
         public static IEnumerator<float> OnDied(DiedEventArgs ev)
         {
-            Coins[ev.Player] = 0;
-
             for (int i = 0; i < 5; i++)
             {
                 ev.Player.ShowHint($"{5 - i}초 뒤 부활합니다.", 1.2f);
@@ -137,13 +135,7 @@ namespace Castle.Core.EventArgs
 
         public static void OnFlippingCoin(FlippingCoinEventArgs ev)
         {
-            ev.Player.RemoveItem(ev.Item);
-
-            int coin = Random.Range(1, Random.Range(1, Random.Range(2, Random.Range(3, 6))));
-
-            Coins[ev.Player] += coin;
-
-            ev.Player.ShowHint($"<color=#BFFF00><b>${coin}</b></color>를 획득했습니다. (<color=#F3F781>$<b>{Coins[ev.Player]}</b></color>)", 1.2f);
+            ev.Player.ShowHint("이 동전으로 <b><color=#FE642E>상점</color></b>에서 아이템을 구매할 수 있습니다.", 2);
         }
 
         public static IEnumerator<float> OnTogglingNoClip(TogglingNoClipEventArgs ev)
@@ -152,7 +144,7 @@ namespace Castle.Core.EventArgs
             {
                 if (TryGetLookPlayer(ev.Player, 2f, out Exiled.API.Features.Player player, out RaycastHit? hit))
                 {
-                    if (ev.Player != player && !HumanMeleeCooldown.Contains(ev.Player) && !GodModePlayers.Contains(player))
+                    if (ev.Player != player && !HumanMeleeCooldown.Contains(ev.Player) && !GodModePlayers.Contains(ev.Player) && !GodModePlayers.Contains(player))
                     {
                         float damageCalcu(string pos)
                         {

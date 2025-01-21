@@ -30,9 +30,11 @@ namespace Castle.Core.Commands.ClientCommands
                     {
                         Products product = ShopProducts.FirstOrDefault(x => x.Name == input);
 
-                        if (product.Price <= Coins[player])
+                        if (product.Price <= player.Items.Where(x => x.Type == ItemType.Coin).Count())
                         {
-                            Coins[player] -= product.Price;
+                            for (int i = 0; i < product.Price; i++)
+                                player.RemoveItem(player.Items.Where(x => x.Type == ItemType.Coin).FirstOrDefault());
+
                             product.Script.Invoke(player);
 
                             response = "구매 완료!";
@@ -46,7 +48,7 @@ namespace Castle.Core.Commands.ClientCommands
                     }
                     else
                     {
-                        response = $"\n<b>[상점 품목 목록]</b>\n\n{string.Join("\n", ShopProducts.Select(x => $"{x.Name}(${x.Price}) - {x.Description}"))}";
+                        response = $"\n<b>[상점 품목 목록]</b>\n\n{string.Join("\n", ShopProducts.Select(x => $"{x.Name}(${x.Price}) - {x.Description}"))}\n\n구매하려면 [.상점 (품목 이름)]을 입력합니다.";
                         return false;
                     }
                 }
