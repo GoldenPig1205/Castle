@@ -25,13 +25,69 @@ namespace Castle.Core.Variables
         public static List<Player> GodModePlayers = new List<Player>();
         public static List<Player> IntercomPlayers = new List<Player>();
         public static List<GameObject> SpawnPoints = new List<GameObject>();
+        public static List<ItemType> BlockedItems = new List<ItemType>()
+        {
+            ItemType.Snowball,
+            ItemType.Coal,
+            ItemType.SpecialCoal,
+            ItemType.SCP1507Tape
+        };
         public static List<Products> ShopProducts = new List<Products>()
         {
             new Products()
             {
+                Name = "낡은 갑옷",
+                Description = "방어력이 영구히 5% 증가합니다. 죽으면 초기화됩니다. (최대 50%)",
+                Price = 1,
+                Script = (player) =>
+                {
+                    if (player.GetEffect(EffectType.DamageReduction).Intensity < 100)
+                    {
+                        player.GetEffect(EffectType.DamageReduction).Intensity += 10;
+                        player.SendConsoleMessage($"방어 효과가 성공적으로 증가했습니다. (현재 방어력: {player.GetEffect(EffectType.DamageReduction).Intensity / 2}%)", "white");
+                    }
+
+                    else
+                    {
+                        player.SendConsoleMessage($"방어력이 이미 50%를 넘었습니다. 동전 1개가 반환됩니다.", "white");
+                        player.AddItem(ItemType.Coin);
+                    }
+                }
+            },
+            new Products()
+            {
+                Name = "낡은 부츠",
+                Description = "이동 속도가 영구히 5% 증가합니다. 죽으면 초기화됩니다. (최대 50%)",
+                Price = 1,
+                Script = (player) =>
+                {
+                    if (player.GetEffect(EffectType.MovementBoost).Intensity < 50)
+                    {
+                        player.GetEffect(EffectType.MovementBoost).Intensity += 5;
+                        player.SendConsoleMessage($"추가 이동 속도가 성공적으로 증가했습니다. (현재 추가 이동 속도: {player.GetEffect(EffectType.MovementBoost).Intensity}%)", "white");
+                    }
+
+                    else
+                    {
+                        player.SendConsoleMessage($"추가 이동 속도가 이미 50%를 넘었습니다. 동전 1개가 반환됩니다.", "white");
+                        player.AddItem(ItemType.Coin);
+                    }
+                }
+            },
+            new Products()
+            {
+                Name = "마법의 물약",
+                Description = "몸의 크기가 10% 줄어듭니다. (제한 없음)",
+                Price = 1, Script = (player) =>
+                {
+                    player.Scale *= 0.9f;
+                }
+            },
+            new Products()
+            {
                 Name = "확성기",
                 Description = "30초 간 확성기가 활성화됩니다.",
-                Price = 5,
+                Price = 2,
                 Script = (player) =>
                 {
                     Server.ExecuteCommand($"/icom {player.Id} 1");
@@ -49,10 +105,10 @@ namespace Castle.Core.Variables
             new Products()
             {
                 Name = "순간이동 허가증",
-                Description = "랜덤한 유저의 위치로 이동합니다. 투명이 3초 동안 적용됩니다.",
-                Price = 10, Script = (player) =>
+                Description = "랜덤한 유저의 위치로 이동합니다(본인 포함). 투명이 3초 동안 적용됩니다.",
+                Price = 3, Script = (player) =>
                 {
-                    player.Position = Player.List.GetRandomValue().Position;
+                    player.Position = Player.List.Where(x => !x.IsNPC).GetRandomValue().Position;
 
                     player.EnableEffect(EffectType.Invisible, 1, 3);
                 }
@@ -61,18 +117,16 @@ namespace Castle.Core.Variables
             {
                 Name = "보따리",
                 Description = "즉시 랜덤한 아이템 8개가 당신 아래에 떨궈집니다.",
-                Price = 15, Script = (player) => 
+                Price = 4, Script = (player) => 
                 {
                     for (int i = 0; i < 8; i++)
                     {
-                        Item item = Item.Create(EnumToList<ItemType>().GetRandomValue());
+                        Item item = Item.Create(EnumToList<ItemType>().Where(x => !BlockedItems.Contains(x)).GetRandomValue());
 
                         item.CreatePickup(player.Position);
                     }
                 } 
             },
         };
-
-        public static Dictionary<Player, int> Coins = new Dictionary<Player, int>();
     }
 }
