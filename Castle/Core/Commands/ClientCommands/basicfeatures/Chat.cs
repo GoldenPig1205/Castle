@@ -9,6 +9,7 @@ using PlayerRoles;
 using UnityEngine;
 
 using static Castle.Core.Variables.Base;
+using static Castle.Core.Functions.Base;
 
 using DiscordInteraction.Discord;
 
@@ -16,6 +17,7 @@ using CustomPlayerEffects;
 using Exiled.API.Features.Items;
 using DiscordInteraction.API.DataBases;
 using System.Net.Sockets;
+using Mirror;
 
 namespace RGM.Commands.ClientCommands
 {
@@ -45,7 +47,7 @@ namespace RGM.Commands.ClientCommands
                     string text = Trans.Role[player.Role.Type];
                     string text2 = string.Concat(new string[]
                     {
-                        $"<size=25><color={player.Role.Color.ToHex()}>",
+                        $"<size=25><b>{chatType}</b>ㅣ{BadgeFormat(player)}<color={player.Role.Color.ToHex()}>",
                         text,
                         $"</color> ({player.DisplayNickname}) <b> | </b>",
                         string.Join(" ", arguments).Replace("=", "❤️"),
@@ -54,14 +56,14 @@ namespace RGM.Commands.ClientCommands
 
                     bool Check(Player p)
                     {
-                        if (player.VoiceChannel == VoiceChat.VoiceChatChannel.Intercom)
-                            return true;
-
                         if (player.IsDead && p.CurrentItem is Scp1576 scp1576)
                         {
                             if (scp1576.IsUsing)
                                 return true;
                         }
+
+                        if (chatType == "전체 채팅")
+                            return true;
 
                         if (chatType == "SCP 채팅")
                             return p.IsDead || p.IsScp || p.Role.Type == RoleTypeId.ZombieFlamingo;
@@ -71,6 +73,9 @@ namespace RGM.Commands.ClientCommands
 
                         if (chatType == "관전자 채팅")
                             return p.IsDead;
+
+                        if (chatType == "근거리 + 무전기 채팅")
+                            return p.IsDead || Vector3.Distance(p.Position, player.Position) <= 10 || p.HasItem(ItemType.Radio);
 
                         if (chatType == "근거리 채팅")
                             return p.IsDead || Vector3.Distance(p.Position, player.Position) <= 10;
@@ -95,7 +100,12 @@ namespace RGM.Commands.ClientCommands
                     return false;
                 }
 
-                if (player.IsScp || player.Role.Type == RoleTypeId.ZombieFlamingo)
+                if (IntercomPlayers.Contains(player))
+                {
+                    response = ChatFormat("전체 채팅");
+                    return true;
+                }
+                else if (player.IsScp || player.Role.Type == RoleTypeId.ZombieFlamingo)
                 {
                     response = ChatFormat("SCP 채팅");
                     return true;
@@ -108,6 +118,11 @@ namespace RGM.Commands.ClientCommands
                 else if (player.IsDead)
                 {
                     response = ChatFormat("관전자 채팅");
+                    return true;
+                }
+                else if (player.HasItem(ItemType.Radio))
+                {
+                    response = ChatFormat("근거리 + 무전기 채팅");
                     return true;
                 }
                 else
