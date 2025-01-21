@@ -24,6 +24,8 @@ namespace Castle.Core.EventArgs
     {
         public static IEnumerator<float> OnVerified(VerifiedEventArgs ev)
         {
+            Coins.Add(ev.Player, 0);
+
             yield return Timing.WaitForSeconds(1);
 
             AudioPlayer audioPlayer = AudioPlayer.CreateOrGet($"Player - {ev.Player.UserId}", condition: (hub) =>
@@ -55,6 +57,7 @@ namespace Castle.Core.EventArgs
 
         public static void OnLeft(LeftEventArgs ev)
         {
+            Coins.Remove(ev.Player);
         }
 
         public static void OnSpawned(SpawnedEventArgs ev)
@@ -77,6 +80,12 @@ namespace Castle.Core.EventArgs
             }
         }
 
+        public static void OnHandcuffing(HandcuffingEventArgs ev)
+        {
+            if (GodModePlayers.Contains(ev.Player))
+                ev.IsAllowed = false;
+        }
+
         public static void OnHurting(HurtingEventArgs ev)
         {
             if (GodModePlayers.Contains(ev.Player))
@@ -85,6 +94,8 @@ namespace Castle.Core.EventArgs
 
         public static IEnumerator<float> OnDied(DiedEventArgs ev)
         {
+            Coins[ev.Player] = 0;
+
             for (int i = 0; i < 5; i++)
             {
                 ev.Player.ShowHint($"{5 - i}초 뒤 부활합니다.", 1.2f);
@@ -122,6 +133,17 @@ namespace Castle.Core.EventArgs
                     }
                 });
             }
+        }
+
+        public static void OnFlippingCoin(FlippingCoinEventArgs ev)
+        {
+            ev.Player.RemoveItem(ev.Item);
+
+            int coin = Random.Range(1, Random.Range(1, Random.Range(2, Random.Range(3, 6))));
+
+            Coins[ev.Player] += coin;
+
+            ev.Player.ShowHint($"<color=#BFFF00><b>${coin}</b></color>를 획득했습니다. (<color=#F3F781>$<b>{Coins[ev.Player]}</b></color>)", 1.2f);
         }
 
         public static IEnumerator<float> OnTogglingNoClip(TogglingNoClipEventArgs ev)
