@@ -77,6 +77,27 @@ namespace Castle.Core.IEnumerators
             {
                 try
                 {
+                    switch (Random.Range(1, 4)) 
+                    {
+                        case 1:
+                            Item coin = Item.Create(ItemType.Coin);
+
+                            coin.CreatePickup(new Vector3(Random.Range(-45, 42), Random.Range(2019, 2001), Random.Range(0, 254)), new Quaternion(Random.Range(0, 180), Random.Range(0, 180), Random.Range(0, 180), Random.Range(0, 180)));
+                            break;
+
+                        case 2:
+                            Item ammo = Item.Create(EnumToList<ItemType>().GetRandomValue(x => x.IsAmmo()));
+
+                            ammo.CreatePickup(new Vector3(Random.Range(-45, 42), Random.Range(2019, 2001), Random.Range(0, 254)), new Quaternion(Random.Range(0, 180), Random.Range(0, 180), Random.Range(0, 180), Random.Range(0, 180)));
+                            break;
+
+                        case 3:
+                            Item medical = Item.Create(EnumToList<ItemType>().GetRandomValue(x => new List<ItemType>() { ItemType.Medkit, ItemType.Painkillers }.Contains(x)));
+
+                            medical.CreatePickup(new Vector3(Random.Range(-45, 42), Random.Range(2019, 2001), Random.Range(0, 254)), new Quaternion(Random.Range(0, 180), Random.Range(0, 180), Random.Range(0, 180), Random.Range(0, 180)));
+                            break;
+                    }
+
                     Item item = Item.Create(EnumToList<ItemType>().GetRandomValue());
 
                     item.CreatePickup(new Vector3(Random.Range(-45, 42), Random.Range(2019, 2001), Random.Range(0, 254)), new Quaternion(Random.Range(0, 180), Random.Range(0, 180), Random.Range(0, 180), Random.Range(0, 180)));
@@ -114,6 +135,9 @@ namespace Castle.Core.IEnumerators
 
 [ALT]ㅣ근접 공격
 닉언, 팀킬 규정에 영향을 받지 않음
+
+Map Create by @punkkk_
+Plugin Create by @goldenpig1205
 </size>
 
 
