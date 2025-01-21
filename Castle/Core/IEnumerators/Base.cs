@@ -46,7 +46,7 @@ namespace Castle.Core.IEnumerators
                         breakableDoor.Repair();
                 }
 
-                yield return Timing.WaitForSeconds(60);
+                yield return Timing.WaitForSeconds(120);
             }
         }
 
