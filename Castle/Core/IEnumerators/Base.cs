@@ -46,7 +46,7 @@ namespace Castle.Core.IEnumerators
                         breakableDoor.Repair();
                 }
 
-                yield return Timing.WaitForSeconds(120);
+                yield return Timing.WaitForSeconds(60);
             }
         }
 
@@ -153,6 +153,20 @@ Plugin Create by @goldenpig1205
                                 GodModePlayers.Add(player);
 
                             player.ShowHint($"이 지역은 <b><color=#F5ECCE>평화 구역</color></b>입니다. 무적이 적용됩니다.", 1.2f);
+                        }
+                        else if (name == "Shop")
+                        {
+                            if (!GodModePlayers.Contains(player))
+                                GodModePlayers.Add(player);
+
+                            player.ShowHint($"이 건물은 <b><color=#FE642E>상점</color></b>입니다. 무적이 적용됩니다.", 1.2f);
+                        }
+                        else if (name == "Church")
+                        {
+                            if (!GodModePlayers.Contains(player))
+                                GodModePlayers.Add(player);
+
+                            player.ShowHint($"이 건물은 <b><color=#BDBDBD>교회</color></b>입니다. 무적이 적용됩니다.", 1.2f);
                         }
                         else
                         {
