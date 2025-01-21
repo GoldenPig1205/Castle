@@ -5,6 +5,7 @@ using Castle.Core.Classes;
 using CommandSystem;
 using Exiled.API.Extensions;
 using Exiled.API.Features;
+using InventorySystem.Items.Firearms.Modules;
 using MultiBroadcast.API;
 using PlayerRoles;
 using UnityEngine;
@@ -21,27 +22,43 @@ namespace Castle.Core.Commands.ClientCommands
             string input = string.Join(" ", arguments);
             Player player = Player.Get(sender);
 
-            if (ShopProducts.Select(x => x.Name).Contains(input))
+            if (Physics.Raycast(player.Position, Vector3.down, out RaycastHit hit, 3, (LayerMask)1))
             {
-                Products product = ShopProducts.FirstOrDefault(x => x.Name == input);
-
-                if (product.Price <= Coins[player])
+                if (hit.transform.name == "Shop")
                 {
-                    Coins[player] -= product.Price;
-                    product.Script.Invoke(player);
+                    if (ShopProducts.Select(x => x.Name).Contains(input))
+                    {
+                        Products product = ShopProducts.FirstOrDefault(x => x.Name == input);
 
-                    response = "구매 완료!";
-                    return true;
+                        if (product.Price <= Coins[player])
+                        {
+                            Coins[player] -= product.Price;
+                            product.Script.Invoke(player);
+
+                            response = "구매 완료!";
+                            return true;
+                        }
+                        else
+                        {
+                            response = "코인이 부족합니다.";
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        response = $"\n<b>[상점 품목 목록]</b>\n\n{string.Join("\n", ShopProducts.Select(x => $"{x.Name}(${x.Price}) - {x.Description}"))}";
+                        return false;
+                    }
                 }
                 else
                 {
-                    response = "코인이 부족합니다.";
+                    response = "상점에서만 사용할 수 있습니다. 특정 건물을 잘 살펴보세요.";
                     return false;
                 }
             }
             else
             {
-                response = $"\n<b>[상점 품목 목록]</b>\n\n{string.Join("\n", ShopProducts.Select(x => $"{x.Name}(${x.Price}) - {x.Description}"))}";
+                response = "상점에서만 사용할 수 있습니다. 특정 건물을 잘 살펴보세요.";
                 return false;
             }
         }
