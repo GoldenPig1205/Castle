@@ -77,10 +77,10 @@ namespace Castle.Core.Variables
             new Products()
             {
                 Name = "마법의 물약",
-                Description = "몸의 크기가 10% 줄어듭니다. (제한 없음)",
+                Description = "몸의 크기가 3% 줄어듭니다. (제한 없음)",
                 Price = 1, Script = (player) =>
                 {
-                    player.Scale *= 0.9f;
+                    player.Scale *= 0.97f;
                 }
             },
             new Products()
