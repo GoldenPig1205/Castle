@@ -14,43 +14,48 @@ using Exiled.API.Features.DamageHandlers;
 using DiscordInteraction.API.DataBases;
 using Exiled.API.Extensions;
 using Mirror;
-using PluginAPI.Core;
 using MultiBroadcast.API;
 using PlayerRoles.FirstPersonControl.Thirdperson.Subcontrollers;
+using Exiled.API.Features;
 
 namespace Castle.Core.EventArgs
 {
     public static class PlayerEvents
     {
-        public static IEnumerator<float> OnVerified(VerifiedEventArgs ev)
+        public static void OnVerified(VerifiedEventArgs ev)
+        {
+            Timing.RunCoroutine(Verified(ev.Player));
+        }
+
+        public static IEnumerator<float> Verified(Player player)
         {
             yield return Timing.WaitForSeconds(1);
 
-            AudioPlayer audioPlayer = AudioPlayer.CreateOrGet($"Player - {ev.Player.UserId}", condition: (hub) =>
+            AudioPlayer audioPlayer = AudioPlayer.CreateOrGet($"Player - {player.UserId}", condition: (hub) =>
             {
-                return hub == ev.Player.ReferenceHub;
+                return hub == player.ReferenceHub;
             }
             , onIntialCreation: (p) =>
             {
-                p.transform.parent = ev.Player.GameObject.transform;
+                p.transform.parent = player.GameObject.transform;
 
                 Speaker speaker = p.AddSpeaker("Main", isSpatial: false, minDistance: 0, maxDistance: 1000);
 
-                speaker.transform.parent = ev.Player.GameObject.transform;
+                speaker.transform.parent = player.GameObject.transform;
                 speaker.transform.localPosition = Vector3.zero;
             });
 
-            Spawn(ev.Player);
+            Spawn(player);
 
             yield return Timing.WaitForSeconds(1);
 
-            ev.Player.Position = GameObject.Find("[SpawnPoint] Start").transform.position;
-            ev.Player.EnableEffect(EffectType.Ensnared, 1, 5);
-            ev.Player.IsGodModeEnabled = true;
+            player.Position = GameObject.Find("[SpawnPoint] Start").transform.position;
+            player.EnableEffect(EffectType.Ensnared, 1, 5);
+            player.IsGodModeEnabled = true;
 
             yield return Timing.WaitForSeconds(5);
 
-            ev.Player.IsGodModeEnabled = false;
+            player.IsGodModeEnabled = false;
         }
 
         public static void OnLeft(LeftEventArgs ev)
