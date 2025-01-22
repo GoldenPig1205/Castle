@@ -48,7 +48,7 @@ namespace Castle.Core.Commands.ClientCommands
                     }
                     else
                     {
-                        response = $"\n<b>[상점 품목 목록]</b>\n\n{string.Join("\n", ShopProducts.Select(x => $"{x.Name}(${x.Price}) - {x.Description}"))}\n\n구매하려면 [.상점 (품목 이름)]을 입력합니다.";
+                        response = $"\n<b>[상점 품목 목록]</b>\n\n{string.Join("\n", ShopProducts.Select(x => $"{x.Name}(${x.Price}) - {x.Description}"))}\n\n구매하려면 [.구매 (품목 이름)]을 입력합니다.";
                         return false;
                     }
                 }
