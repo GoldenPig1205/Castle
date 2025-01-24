@@ -68,12 +68,18 @@ namespace Castle.Core.EventArgs
             {
                 Timing.CallDelayed(Timing.WaitForOneFrame, () =>
                 {
-                    Vector3 pos = SpawnPoints.Select(x => x.transform.position).GetRandomValue();
 
-                    ev.Player.Position = new Vector3(pos.x, pos.y + 2, pos.z);
+                    if (ev.Reason != SpawnReason.ItemUsage)
+                    {
+                        Vector3 pos = SpawnPoints.Select(x => x.transform.position).GetRandomValue();
+
+                        ev.Player.Position = new Vector3(pos.x, pos.y + 2, pos.z);
+                    }
+
                     ev.Player.EnableEffect(EffectType.FogControl, 1);
                     ev.Player.EnableEffect(EffectType.SoundtrackMute);
                     ev.Player.EnableEffect(EffectType.SilentWalk, 8);
+                    ev.Player.Scale = new Vector3(1, 1, 1);
 
                     int intensity = CalculateIntensity(Hour);
 
@@ -140,14 +146,14 @@ namespace Castle.Core.EventArgs
 
         public static void OnFlippingCoin(FlippingCoinEventArgs ev)
         {
-            ev.Player.ShowHint("이 동전으로 <b><color=#FE642E>상점</color></b>에서 아이템을 구매할 수 있습니다.", 2);
+            ev.Player.ShowHint("이 동전으로 <b><color=#FE642E>상점</color></b> 또는 <b><color=#A9D0F5>대장간</color></b>을 이용할 수 있습니다.", 2);
         }
 
         public static IEnumerator<float> OnTogglingNoClip(TogglingNoClipEventArgs ev)
         {
             if (ev.Player.IsHuman && !ev.Player.IsCuffed)
             {
-                if (TryGetLookPlayer(ev.Player, 2f, out Exiled.API.Features.Player player, out RaycastHit? hit))
+                if (TryGetLookPlayer(ev.Player, 2f, out Player player, out RaycastHit? hit))
                 {
                     if (ev.Player != player && !HumanMeleeCooldown.Contains(ev.Player) && !GodModePlayers.Contains(ev.Player) && !GodModePlayers.Contains(player))
                     {
