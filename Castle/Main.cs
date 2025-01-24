@@ -16,7 +16,7 @@ namespace Castle
 
         public override string Name => "Castle";
         public override string Author => "GoldenPig1205";
-        public override Version Version { get; } = new(1, 0, 7);
+        public override Version Version { get; } = new(1, 0, 8);
         public override Version RequiredExiledVersion { get; } = new(1, 2, 0, 5);
 
         public override void OnEnabled()
@@ -53,7 +53,7 @@ namespace Castle
             Exiled.Events.Handlers.Player.Hurting -= OnHurting;
             Exiled.Events.Handlers.Player.Died -= OnDied;
             Exiled.Events.Handlers.Player.InteractingDoor -= OnInteractingDoor;
-            Exiled.Events.Handlers.Player.FlippingCoin += OnFlippingCoin;
+            Exiled.Events.Handlers.Player.FlippingCoin -= OnFlippingCoin;
             Exiled.Events.Handlers.Player.TogglingNoClip -= OnTogglingNoClip;
             Exiled.Events.Handlers.Player.ChangedEmotion -= OnChangedEmotion;
 
