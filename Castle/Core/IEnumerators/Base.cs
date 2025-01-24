@@ -19,6 +19,7 @@ using Exiled.Events.Commands.Hub;
 using PlayerRoles.FirstPersonControl;
 using RelativePositioning;
 using Exiled.API.Features.Pickups;
+using MapEditorReborn.API.Extensions;
 
 namespace Castle.Core.IEnumerators
 {
@@ -90,12 +91,9 @@ namespace Castle.Core.IEnumerators
                             break;
 
                         case 2:
-                            for (int i = 0; i < Random.Range(2, 3); i++)
-                            {
-                                Item ammo = Item.Create(EnumToList<ItemType>().GetRandomValue(x => x.IsAmmo()));
+                            Item ammo = Item.Create(EnumToList<ItemType>().GetRandomValue(x => x.IsAmmo()));
 
-                                ammo.CreatePickup(new Vector3(Random.Range(-45, 42), Random.Range(2019, 2001), Random.Range(0, 254)), new Quaternion(Random.Range(0, 180), Random.Range(0, 180), Random.Range(0, 180), Random.Range(0, 180)));
-                            }
+                            ammo.CreatePickup(new Vector3(Random.Range(-45, 42), Random.Range(2019, 2001), Random.Range(0, 254)), new Quaternion(Random.Range(0, 180), Random.Range(0, 180), Random.Range(0, 180), Random.Range(0, 180)));
                             break;
 
                         case 3:
@@ -105,8 +103,32 @@ namespace Castle.Core.IEnumerators
                             break;
                     }
 
-                    Item item = Item.Create(EnumToList<ItemType>().GetRandomValue());
+                    List<ItemType> pistols = new List<ItemType>()
+                    { 
+                        ItemType.GunCOM15,
+                        ItemType.GunCOM18,
+                        ItemType.GunRevolver
+                    };
 
+                    ItemType itemType = EnumToList<ItemType>().GetRandomValue();
+
+                    if (itemType.ToString().Contains("Gun") || SpeicalWeapons.Contains(itemType))
+                    {
+                        if (Random.Range(1, 101) == 1)
+                            break;
+
+                        else if (Random.Range(1, 4) > 1)
+                        {
+                            itemType = EnumToList<ItemType>().Where(x => !(x.ToString().Contains("Gun") || SpeicalWeapons.Contains(x))).GetRandomValue();
+                        }
+                        else
+                        {
+                            itemType = pistols.GetRandomValue();
+                            break;
+                        }
+                    }
+
+                    Item item = Item.Create(itemType);
                     item.CreatePickup(new Vector3(Random.Range(-45, 42), Random.Range(2019, 2001), Random.Range(0, 254)), new Quaternion(Random.Range(0, 180), Random.Range(0, 180), Random.Range(0, 180), Random.Range(0, 180)));
                 }
                 catch { }
@@ -134,7 +156,7 @@ namespace Castle.Core.IEnumerators
 잠시 쉬어가는 곳입니다. 여러 용도로 사용될 수 있는 넓디 넓은 공간이에요.
 여기서 친구들과 만나 개인적인 이야기를 나누거나, 무언가를 공유하거나, 놀거나, 무엇이든 할 수 있어요.
 
-또한, 콘솔(` 또는 ~)을 열고 [.help] 명령어를 입력하여 사용할 수 있는 명령어에 대한 도움말을 확인할 수 있어요.
+<b>또한, 콘솔(` 또는 ~)을 열고 [.help] 명령어를 입력하여 사용할 수 있는 명령어에 대한 도움말을 확인할 수 있어요.</b>
 
 지루하신가요? 그럼 랜덤한 아이템을 맵 곳곳에 스폰시켜드릴게요.
 또한, 팀킬도 가능합니다. 단, 상대가 <b><color=#F5ECCE>평화 구역</color></b>에 있으면 팀킬이 불가능합니다.
@@ -151,17 +173,17 @@ Plugin Create by @goldenpig1205
 """, 1.2f);
                         }
                         else if (name == "[Platform] Hidden")
-                        {
                             player.ShowHint($"어떻게 하면 더 멀리 바라볼 수 있을까?", 1.2f);
-                        }
+
                         else if (name == "Peace")
-                        {
                             player.ShowHint($"이 지역은 <b><color=#F5ECCE>평화 구역</color></b>입니다. 무적이 적용됩니다.", 1.2f);
-                        }
+
                         else if (name == "Shop")
-                        {
                             player.ShowHint($"이 건물은 <b><color=#FE642E>상점</color></b>입니다. [.구매] 명령어를 사용해보세요.", 1.2f);
-                        }
+
+                        else if (name == "Smithy")
+                            player.ShowHint($"이 건물은 <b><color=#A9D0F5>대장간</color></b>입니다. [.수리] 또는 [.강화] 명령어를 사용해보세요.", 1.2f);
+
                         else if (name == "Church")
                         {
                             if (!GodModePlayers.Contains(player))
