@@ -12,18 +12,24 @@ namespace Castle.Core.Functions
 {
     public static class Base
     {
-        public static void Spawn(Player player)
+        public static void Spawn(Player player, RoleTypeId roleTypeId = RoleTypeId.None)
         {
-            List<RoleTypeId> exceptRoles = new List<RoleTypeId>
+            List<RoleTypeId> roles = new List<RoleTypeId>
             {
-                RoleTypeId.Flamingo,
-                RoleTypeId.AlphaFlamingo,
-                RoleTypeId.ZombieFlamingo,
-                RoleTypeId.CustomRole,
-                RoleTypeId.Scp3114
+                RoleTypeId.ClassD,
+                RoleTypeId.Scientist,
+                RoleTypeId.FacilityGuard,
+                RoleTypeId.NtfPrivate,
+                RoleTypeId.ChaosRifleman,
+                RoleTypeId.Tutorial
             };
 
-            player.Role.Set(EnumToList<RoleTypeId>().Where(x => x.IsHuman() && !exceptRoles.Contains(x)).GetRandomValue());
+            if (roleTypeId == RoleTypeId.None)
+                player.Role.Set(EnumToList<RoleTypeId>().Where(roles.Contains).GetRandomValue());
+
+            else
+                player.Role.Set(roleTypeId);
+
             player.ClearInventory();
         }
 
