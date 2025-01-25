@@ -137,5 +137,7 @@ namespace Castle.Core.Variables
                 } 
             },
         };
+
+        public static Dictionary<Player, int> KillCounts = new Dictionary<Player, int>();
     }
 }

@@ -20,6 +20,8 @@ using PlayerRoles.FirstPersonControl;
 using RelativePositioning;
 using Exiled.API.Features.Pickups;
 using MapEditorReborn.API.Extensions;
+using PluginAPI.Core.Attributes;
+using MultiBroadcast.API;
 
 namespace Castle.Core.IEnumerators
 {
@@ -29,7 +31,7 @@ namespace Castle.Core.IEnumerators
         {
             while (true)
             {
-                if (Hour == 23)
+                if (Hour == 24)
                     Hour = 0;
 
                 Hour++;
@@ -37,7 +39,10 @@ namespace Castle.Core.IEnumerators
                 int intensity = CalculateIntensity(Hour);
 
                 foreach (var player in Player.List)
+                {
                     player.EnableEffect(EffectType.Blinded, (byte)intensity);
+                    player.AddBroadcast(10, $"<size=25><b>현재 시간은 {Hour}시입니다.</b></size>");
+                }
 
                 foreach (string method in new List<string>() { "bulletholes", "blood", "ragdolls", "items" })
                     Server.ExecuteCommand($"/cleanup {method}");
@@ -48,7 +53,7 @@ namespace Castle.Core.IEnumerators
                         breakableDoor.Repair();
                 }
 
-                yield return Timing.WaitForSeconds(120);
+                yield return Timing.WaitForSeconds(180);
             }
         }
 
@@ -115,8 +120,9 @@ namespace Castle.Core.IEnumerators
                     if (itemType.ToString().Contains("Gun") || SpeicalWeapons.Contains(itemType))
                     {
                         if (Random.Range(1, 101) == 1)
-                            break;
+                        {
 
+                        }    
                         else if (Random.Range(1, 4) > 1)
                         {
                             itemType = EnumToList<ItemType>().Where(x => !(x.ToString().Contains("Gun") || SpeicalWeapons.Contains(x))).GetRandomValue();
@@ -124,14 +130,12 @@ namespace Castle.Core.IEnumerators
                         else
                         {
                             itemType = pistols.GetRandomValue();
-                            break;
                         }
                     }
 
-                    Item item = Item.Create(itemType);
-                    item.CreatePickup(new Vector3(Random.Range(-45, 42), Random.Range(2019, 2001), Random.Range(0, 254)), new Quaternion(Random.Range(0, 180), Random.Range(0, 180), Random.Range(0, 180), Random.Range(0, 180)));
+                    Pickup.CreateAndSpawn(itemType, new Vector3(Random.Range(-45, 42), Random.Range(2019, 2001), Random.Range(0, 254)), new Quaternion(Random.Range(0, 180), Random.Range(0, 180), Random.Range(0, 180), Random.Range(0, 180)));
                 }
-                catch { }
+                catch {}
 
                 yield return Timing.WaitForSeconds(1);
             }
@@ -152,22 +156,10 @@ namespace Castle.Core.IEnumerators
                             player.ShowHint($"""
 <b><size=60>Welcome to <color=#F5D0A9>만남의 광장</color>!</size></b>
 
-<size=20>
-잠시 쉬어가는 곳입니다. 여러 용도로 사용될 수 있는 넓디 넓은 공간이에요.
-여기서 친구들과 만나 개인적인 이야기를 나누거나, 무언가를 공유하거나, 놀거나, 무엇이든 할 수 있어요.
+<size=20>[ESC] -> [Server Info]로 이동하여 서버 설명을 읽어보세요.</size>
 
-<b>또한, 콘솔(` 또는 ~)을 열고 [.help] 명령어를 입력하여 사용할 수 있는 명령어에 대한 도움말을 확인할 수 있어요.</b>
 
-지루하신가요? 그럼 랜덤한 아이템을 맵 곳곳에 스폰시켜드릴게요.
-또한, 팀킬도 가능합니다. 단, 상대가 <b><color=#F5ECCE>평화 구역</color></b>에 있으면 팀킬이 불가능합니다.
-1시간(실제 시간으로는 2분)마다 맵을 대신 청소해 드립니다. 행운을 빌어요!
 
-[ALT]ㅣ근접 공격
-닉언, 팀킬 규정에 영향을 받지 않음
-
-Map Create by @punkkk_
-Plugin Create by @goldenpig1205
-</size>
 
 
 """, 1.2f);
@@ -186,10 +178,16 @@ Plugin Create by @goldenpig1205
 
                         else if (name == "Church")
                         {
-                            if (!GodModePlayers.Contains(player))
-                                GodModePlayers.Add(player);
+                            if (KillCounts[player] > 0)
+                                player.ShowHint($"<color=#FA5858>살인자</color>는 신성한 가호를 받을 수 없습니다.", 1.2f);
 
-                            player.ShowHint($"이 건물은 <b><color=#BDBDBD>교회</color></b>입니다. 신성한 곳에서는 싸움을 금합니다.", 1.2f);
+                            else
+                            {
+                                if (!GodModePlayers.Contains(player))
+                                    GodModePlayers.Add(player);
+
+                                player.ShowHint($"이 건물은 <b><color=#BDBDBD>교회</color></b>입니다. 신성한 곳에서는 싸움을 금합니다.", 1.2f);
+                            }
                         }
                         else
                         {
@@ -198,6 +196,19 @@ Plugin Create by @goldenpig1205
                         }
                     }
                 }
+
+                yield return Timing.WaitForSeconds(1);
+            }
+        }
+
+        public static IEnumerator<float> Guide()
+        {
+            while (true)
+            {
+                var wantedPlayers = KillCounts.Where(kvp => kvp.Value >= 3).Select(kvp => $"{kvp.Key.Nickname}({kvp.Value}킬)").ToList();
+
+                foreach (var player in Player.List)
+                    player.AddBroadcast(1, $"<size=20><b>[ <color=red>현상수배</color> ]</b></size>\n<size=15>{string.Join(", ", wantedPlayers)}</size>");
 
                 yield return Timing.WaitForSeconds(1);
             }

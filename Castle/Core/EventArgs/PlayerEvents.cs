@@ -29,6 +29,8 @@ namespace Castle.Core.EventArgs
 
         public static IEnumerator<float> Verified(Player player)
         {
+            KillCounts.Add(player, 0);
+
             yield return Timing.WaitForSeconds(1);
 
             AudioPlayer audioPlayer = AudioPlayer.CreateOrGet($"Player - {player.UserId}", condition: (hub) =>
@@ -60,6 +62,7 @@ namespace Castle.Core.EventArgs
 
         public static void OnLeft(LeftEventArgs ev)
         {
+            KillCounts.Remove(ev.Player);
         }
 
         public static void OnSpawned(SpawnedEventArgs ev)
@@ -99,12 +102,33 @@ namespace Castle.Core.EventArgs
             if (ev.Attacker == null)
                 return;
 
+            ev.DamageHandler.Damage *= 1 + Mathf.Min((KillCounts[ev.Attacker] + KillCounts[ev.Player]) / 25, 1);
+
             if (GodModePlayers.Contains(ev.Attacker) || GodModePlayers.Contains(ev.Player))
                 ev.IsAllowed = false;
         }
 
         public static IEnumerator<float> OnDied(DiedEventArgs ev)
         {
+            if (ev.Attacker != null)
+            {
+                if (KillCounts[ev.Player] >= 3)
+                {
+                    int Gratuity = KillCounts[ev.Player] / 3;
+
+                    ev.Attacker.ShowHint($"<b>검거 완료!</b> <color=#ffd700>${Gratuity}</color>를 포상으로 획득합니다.");
+                    ev.Attacker.AddItem(ItemType.Coin, Gratuity);
+                }
+                else if (KillCounts[ev.Player] == 0)
+                {
+                    KillCounts[ev.Attacker]++;
+
+                    ev.Attacker.ShowHint($"<color=#FF0000>악명</color>이 1 증가했습니다. (총 {KillCounts[ev.Attacker]})");
+                }
+            }
+
+            KillCounts[ev.Player] /= 2;
+
             for (int i = 0; i < 5; i++)
             {
                 ev.Player.ShowHint($"{5 - i}초 뒤 부활합니다.", 1.2f);
