@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Exiled.API.Features;
 
 using static Castle.Core.EventArgs.ServerEvents;
+using static Castle.Core.EventArgs.MapEvents;
 using static Castle.Core.EventArgs.PlayerEvents;
 
 namespace Castle
@@ -16,7 +17,7 @@ namespace Castle
 
         public override string Name => "Castle";
         public override string Author => "GoldenPig1205";
-        public override Version Version { get; } = new(1, 0, 9);
+        public override Version Version { get; } = new(1, 0, 10);
         public override Version RequiredExiledVersion { get; } = new(1, 2, 0, 5);
 
         public override void OnEnabled()
@@ -27,6 +28,8 @@ namespace Castle
             Exiled.Events.Handlers.Server.WaitingForPlayers += OnWaitingForPlayers;
             Exiled.Events.Handlers.Server.RoundStarted += OnRoundStarted;
             Exiled.Events.Handlers.Server.RoundEnded += OnRoundEnded;
+
+            Exiled.Events.Handlers.Map.PickupAdded += OnPickupAdded;
 
             Exiled.Events.Handlers.Player.Verified += OnVerified;
             Exiled.Events.Handlers.Player.Left += OnLeft;
@@ -45,6 +48,8 @@ namespace Castle
             Exiled.Events.Handlers.Server.WaitingForPlayers -= OnWaitingForPlayers;
             Exiled.Events.Handlers.Server.RoundStarted -= OnRoundStarted;
             Exiled.Events.Handlers.Server.RoundEnded -= OnRoundEnded;
+
+            Exiled.Events.Handlers.Map.PickupAdded -= OnPickupAdded;
 
             Exiled.Events.Handlers.Player.Verified -= OnVerified;
             Exiled.Events.Handlers.Player.Left -= OnLeft;
