@@ -5,6 +5,7 @@ using CommandSystem;
 using Exiled.API.Enums;
 using Exiled.API.Extensions;
 using Exiled.API.Features;
+using MEC;
 using MultiBroadcast.API;
 using PlayerRoles;
 using UnityEngine;
@@ -37,7 +38,15 @@ namespace Castle.Core.Commands.ClientCommands
             {
                 if (roles.Keys.Contains(arguments.At(0)))
                 {
+                    Vector3 pos = player.Position;
+
                     player.Role.Set(roles[arguments.At(0)], SpawnReason.ItemUsage, RoleSpawnFlags.None);
+                    player.Position = new Vector3(29, 991, -28);
+
+                    Timing.CallDelayed(Timing.WaitForOneFrame, () =>
+                    {
+                        player.Position = pos;
+                    });
 
                     response = $"당신은 이제 {arguments.At(0)}입니다.";
                     return true;

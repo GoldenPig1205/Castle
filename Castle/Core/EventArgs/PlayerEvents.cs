@@ -69,6 +69,8 @@ namespace Castle.Core.EventArgs
         {
             if (ev.Player.IsAlive)
             {
+                ev.Player.Position = new Vector3(29, 991, -28);
+
                 Timing.CallDelayed(Timing.WaitForOneFrame, () =>
                 {
 
@@ -102,15 +104,13 @@ namespace Castle.Core.EventArgs
             if (ev.Attacker == null)
                 return;
 
-            ev.DamageHandler.Damage *= 1 + Mathf.Min((KillCounts[ev.Attacker] + KillCounts[ev.Player]) / 25, 1);
-
-            if (GodModePlayers.Contains(ev.Attacker) || GodModePlayers.Contains(ev.Player))
+            if (!ev.Attacker.IsNPC && GodModePlayers.Contains(ev.Player))
                 ev.IsAllowed = false;
         }
 
         public static IEnumerator<float> OnDied(DiedEventArgs ev)
         {
-            if (ev.Attacker != null)
+            if (ev.Attacker != null && !ev.Attacker.IsNPC)
             {
                 if (KillCounts[ev.Player] >= 3)
                 {
@@ -138,13 +138,17 @@ namespace Castle.Core.EventArgs
 
             string MessageFormat()
             {
-                if (ev.Attacker == null)
+                if (!(ev.Attacker == null || ev.Attacker.IsNPC))
                     return $"💀 <color=#A4A4A4>자살</color>ㅣ{BadgeFormat(ev.Player)}<color=#F2F5A9>{ev.Player.DisplayNickname}</color>(<color={ev.TargetOldRole.GetColor().ToHex()}>{Trans.Role[ev.TargetOldRole]}</color>) - {ev.DamageHandler.Type}";
                 else
                     return $"💔 <color=#FAAC58>{(ev.Player.IsCuffed ? "<b>체포킬</b>(신고 가능 여부는 규칙 확인)" : "사살")}</color>ㅣ{BadgeFormat(ev.Attacker)}<color=#F2F5A9>{ev.Attacker.DisplayNickname}</color>(<color={ev.Attacker.Role.Color.ToHex()}>{Trans.Role[ev.Attacker.Role.Type]}</color>) -> {BadgeFormat(ev.Player)}<color=#F2F5A9>{ev.Player.DisplayNickname}</color>(<color={ev.TargetOldRole.GetColor().ToHex()}>{Trans.Role[ev.TargetOldRole]}</color>) - {ev.DamageHandler.Type}";
             }
-            foreach (var player in Exiled.API.Features.Player.List.Where(x => x.IsDead || x == ev.Attacker))
-                player.AddBroadcast(10, $"<size=20>{MessageFormat()}</size>");
+
+            foreach (var player in Player.List)
+            {
+                if (player.IsDead || !(ev.Attacker == null || ev.Attacker.IsNPC))
+                    player.AddBroadcast(10, $"<size=20>{MessageFormat()}</size>");
+            }
 
             Spawn(ev.Player);
         }
@@ -179,7 +183,7 @@ namespace Castle.Core.EventArgs
             {
                 if (TryGetLookPlayer(ev.Player, 2f, out Player player, out RaycastHit? hit))
                 {
-                    if (ev.Player != player && !HumanMeleeCooldown.Contains(ev.Player) && !GodModePlayers.Contains(ev.Player) && !GodModePlayers.Contains(player))
+                    if (ev.Player != player && !HumanMeleeCooldown.Contains(ev.Player) && !GodModePlayers.Contains(player))
                     {
                         float damageCalcu(string pos)
                         {

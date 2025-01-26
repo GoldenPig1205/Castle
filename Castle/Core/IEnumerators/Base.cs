@@ -44,7 +44,7 @@ namespace Castle.Core.IEnumerators
                     player.AddBroadcast(10, $"<size=25><b>현재 시간은 {Hour}시입니다.</b></size>");
                 }
 
-                foreach (string method in new List<string>() { "bulletholes", "blood", "ragdolls", "items" })
+                foreach (string method in new List<string>() { "bulletholes", "blood", "ragdolls" })
                     Server.ExecuteCommand($"/cleanup {method}");
 
                 foreach (var door in Door.List)
@@ -179,8 +179,12 @@ namespace Castle.Core.IEnumerators
                         else if (name == "Church")
                         {
                             if (KillCounts[player] > 0)
-                                player.ShowHint($"<color=#FA5858>살인자</color>는 신성한 가호를 받을 수 없습니다.", 1.2f);
+                            {
+                                if (GodModePlayers.Contains(player))
+                                    GodModePlayers.Remove(player);
 
+                                player.ShowHint($"<color=#FA5858>살인자</color>는 신성한 가호를 받을 수 없습니다.", 1.2f);
+                            }
                             else
                             {
                                 if (!GodModePlayers.Contains(player))
@@ -207,10 +211,28 @@ namespace Castle.Core.IEnumerators
             {
                 var wantedPlayers = KillCounts.Where(kvp => kvp.Value >= 3).Select(kvp => $"{kvp.Key.Nickname}({kvp.Value}킬)").ToList();
 
-                foreach (var player in Player.List)
-                    player.AddBroadcast(1, $"<size=20><b>[ <color=red>현상수배</color> ]</b></size>\n<size=15>{string.Join(", ", wantedPlayers)}</size>");
+                if (wantedPlayers.Count() > 0)
+                {
+                    foreach (var player in Player.List)
+                        player.AddBroadcast(1, $"<size=25><b>[ <color=red>현상수배</color> ]</b></size>\n<size=20>{string.Join(", ", wantedPlayers)}</size>");
+                }
 
                 yield return Timing.WaitForSeconds(1);
+            }
+        }
+
+        public static IEnumerator<float> Event()
+        {
+            while (true)
+            {
+                yield return Timing.WaitForSeconds(Random.Range(60 * 3, 60 * 10));
+
+                Classes.Events ev = Events.GetRandomValue();
+
+                ev.Script.Invoke();
+                
+                foreach (var player in Player.List)
+                    player.AddBroadcast(10, $"<size=30><b>[ <color=#FAAC58>이벤트 발생</color> ]</b></size>\n<size=25>{ev.Name}ㅣ{ev.Description}</size>");
             }
         }
     }

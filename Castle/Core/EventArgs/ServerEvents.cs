@@ -55,6 +55,7 @@ namespace Castle.Core.EventArgs
             Timing.RunCoroutine(ItemSpawner());
             Timing.RunCoroutine(Platform());
             Timing.RunCoroutine(Guide());
+            Timing.RunCoroutine(Event());
         }
 
         public static void OnRoundStarted()

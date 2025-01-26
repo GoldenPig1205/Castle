@@ -114,6 +114,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\Classes\Events.cs" />
     <Compile Include="Core\Classes\Products.cs" />
     <Compile Include="Core\Commands\ClientCommands\basicfeatures\Chat.cs" />
     <Compile Include="Core\Commands\ClientCommands\basicfeatures\Emotion.cs" />
@@ -122,6 +123,7 @@
     <Compile Include="Core\Commands\ClientCommands\shopfeatures\Buy.cs" />
     <Compile Include="Core\Commands\ClientCommands\smithyfeatures\Repair.cs" />
     <Compile Include="Core\Commands\ClientCommands\smithyfeatures\Upgrade.cs" />
+    <Compile Include="Core\Commands\RemoteAdminCommands\basicfeatures\Event.cs" />
     <Compile Include="Core\Configs\Config.cs" />
     <Compile Include="Core\EventArgs\MapEvents.cs" />
     <Compile Include="Core\EventArgs\PlayerEvents.cs" />
