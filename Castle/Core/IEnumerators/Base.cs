@@ -84,15 +84,12 @@ namespace Castle.Core.IEnumerators
             {
                 try
                 {
-                    switch (Random.Range(1, 4)) 
+                    switch (Random.Range(1, 7)) 
                     {
                         case 1:
-                            for (int i = 0; i < Random.Range(1, 3); i++)
-                            {
-                                Item coin = Item.Create(ItemType.Coin);
+                            Item coin = Item.Create(ItemType.Coin);
 
-                                coin.CreatePickup(new Vector3(Random.Range(-45, 42), Random.Range(2019, 2001), Random.Range(0, 254)), new Quaternion(Random.Range(0, 180), Random.Range(0, 180), Random.Range(0, 180), Random.Range(0, 180)));
-                            }
+                            coin.CreatePickup(new Vector3(Random.Range(-45, 42), Random.Range(2019, 2001), Random.Range(0, 254)), new Quaternion(Random.Range(0, 180), Random.Range(0, 180), Random.Range(0, 180), Random.Range(0, 180)));
                             break;
 
                         case 2:
@@ -227,12 +224,15 @@ namespace Castle.Core.IEnumerators
             {
                 yield return Timing.WaitForSeconds(Random.Range(60 * 3, 60 * 10));
 
-                Classes.Events ev = Events.GetRandomValue();
+                if (Server.PlayerCount > 2)
+                {
+                    Classes.Events ev = Events.GetRandomValue();
 
-                ev.Script.Invoke();
-                
-                foreach (var player in Player.List)
-                    player.AddBroadcast(10, $"<size=30><b>[ <color=#FAAC58>이벤트 발생</color> ]</b></size>\n<size=25>{ev.Name}ㅣ{ev.Description}</size>");
+                    ev.Script.Invoke();
+
+                    foreach (var player in Player.List)
+                        player.AddBroadcast(10, $"<size=30><b>[ <color=#FAAC58>이벤트 발생</color> ]</b></size>\n<size=25>{ev.Name}ㅣ{ev.Description}</size>");
+                }
             }
         }
     }

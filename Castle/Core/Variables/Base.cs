@@ -7,6 +7,7 @@ using Exiled.API.Features;
 using Exiled.API.Features.Items;
 using Exiled.API.Features.Roles;
 using Exiled.CustomItems.API.EventArgs;
+using Exiled.Events.EventArgs.Player;
 using GameCore;
 using InventorySystem.Items.Coin;
 using MapEditorReborn.API.Features;
@@ -188,7 +189,7 @@ namespace Castle.Core.Variables
                 {
                     IEnumerator<float> OnEventStarted()
                     {
-                        SchematicObject distribution = ObjectSpawner.SpawnSchematic("Distribution", new Vector3(Random.Range(-45, 42), 2030, Random.Range(0, 254)), new Quaternion(Random.Range(0, 180), Random.Range(0, 180), Random.Range(0, 180), Random.Range(0, 180)), null, null);
+                        SchematicObject distribution = ObjectSpawner.SpawnSchematic("Distribution", new Vector3(Random.Range(-45, 42), 2050, Random.Range(0, 254)), new Quaternion(Random.Range(0, 180), Random.Range(0, 180), Random.Range(0, 180), Random.Range(0, 180)), null, null);
 
                         yield return Timing.WaitForSeconds(180);
 
@@ -217,8 +218,28 @@ namespace Castle.Core.Variables
                             yield return Timing.WaitForSeconds(1f);
 
                             hub.playerStats.GetModule<HealthStat>().CurValue = 500;
+                            owner.RankName = "무서운";
 
-                            while (true)
+                            List<ItemType> poll = new List<ItemType>();
+                            List<ItemType> items = new List<ItemType>()
+                            {
+                                ItemType.GrenadeHE,
+                                ItemType.GrenadeFlash,
+                                ItemType.Coin,
+                                ItemType.GunA7,
+                                ItemType.GunFSP9,
+                                ItemType.GunCrossvec,
+                                ItemType.Adrenaline,
+                                ItemType.SCP500
+                            };
+
+                            poll.Add(items.GetRandomValue());
+                            poll.Add(ItemType.Coin);
+
+                            foreach (var item in poll)
+                                owner.AddItem(item);
+
+                            while (hub.playerStats.GetModule<HealthStat>().CurValue > 0)
                             {
                                 Player target = Player.List.Where(x => !x.IsNPC).OrderBy(x => Vector3.Distance(hub.transform.position, x.Position)).FirstOrDefault();
                                 PlayerFollower obj;
@@ -232,7 +253,7 @@ namespace Castle.Core.Variables
                                 if (distance < 4)
                                     owner.EnableEffect(EffectType.Slowness, 20, 2);
 
-                                if (distance < 2)
+                                if (distance < 2) 
                                 {
                                     var attack = owner.Role.As<Scp0492Role>().AttackAbility;
 
@@ -246,8 +267,14 @@ namespace Castle.Core.Variables
                                     attackMethod.Invoke(scp0492Role.AttackAbility, null);
                                 }
 
+                                Vector3 pos = hub.transform.position;
+                                
+                                hub.transform.position = new Vector3(pos.x, pos.y + 2f, pos.z);
+
                                 yield return Timing.WaitForSeconds(2);
                             }
+
+                            NetworkServer.Destroy(hub.gameObject);
                         }
 
                         for (int i = 0; i < Player.List.Count() * 2; i++)
@@ -256,7 +283,6 @@ namespace Castle.Core.Variables
 
                             zombie.roleManager.ServerSetRole(PlayerRoles.RoleTypeId.Scp0492, PlayerRoles.RoleChangeReason.ItemUsage);
                             zombie.transform.position = new Vector3(Random.Range(-45, 42), 2030, Random.Range(0, 254));
-                            zombie.serverRoles.SetGroup(new UserGroup() { BadgeText = "무서운", BadgeColor = "red" });
 
                             Timing.RunCoroutine(onSpawnZombie(zombie));
 
@@ -266,7 +292,138 @@ namespace Castle.Core.Variables
 
                     Timing.RunCoroutine(OnEventStarted());
                 }
-            }, 
+            },
+            new Events()
+            {
+                Name = "범죄와의 전쟁",
+                Description = "왕국 치안 경비대가 치안을 강화합니다. 3분간 아무도 서로를 죽일 수 없습니다.",
+                Script = () =>
+                {
+                    IEnumerator<float> OnEventStarted()
+                    {
+                        for (int i = 0; i < 180; i++)
+                        {
+                            foreach (var player in Player.List)
+                            {
+                                if (!GodModePlayers.Contains(player))
+                                    GodModePlayers.Add(player);
+                            }
+
+                            yield return Timing.WaitForSeconds(1);
+                        }
+                    }
+
+                    Timing.RunCoroutine(OnEventStarted());
+                }
+            },
+            new Events()
+            {
+                Name = "밀수입",
+                Description = "2분 간, 12개의 무기가 맵 곳곳에 스폰됩니다.",
+                Script = () =>
+                {
+                    IEnumerator<float> OnEventStarted()
+                    {
+                        for (int i = 0; i < 120; i++)
+                        {
+                            Item weapon = Item.Create(EnumToList<ItemType>().Where(x => x.IsWeapon()).GetRandomValue());
+
+                            weapon.CreatePickup(new Vector3(Random.Range(-45, 42), Random.Range(2019, 2001), Random.Range(0, 254)), new Quaternion(Random.Range(0, 180), Random.Range(0, 180), Random.Range(0, 180), Random.Range(0, 180)));
+
+                            yield return Timing.WaitForSeconds(10);
+                        }
+                    }
+
+                    Timing.RunCoroutine(OnEventStarted());
+                }
+            },
+            new Events()
+            {
+                Name = "무료 봉사",
+                Description = "교회에서 사람들을 위해 거리 곳곳에 회복 포션을 뿌렸습니다. 이 효과는 3분 간 지속됩니다.",
+                Script = () =>
+                {
+                    IEnumerator<float> OnEventStarted()
+                    {
+                        for (int i = 0; i < 180; i++)
+                        {
+                            foreach (var player in Player.List)
+                                player.Heal(2);
+
+                            yield return Timing.WaitForSeconds(1);
+                        }
+                    }
+
+                    Timing.RunCoroutine(OnEventStarted());
+                }
+            },
+            new Events()
+            {
+                Name = "노름판",
+                Description = "1분 간, 아이템을 버리면 새로운 아이템으로 교환됩니다. 단, 5% 확률로 손이 잘립니다.",
+                Script = () =>
+                {
+                    IEnumerator<float> OnEventStarted()
+                    {
+                        void OnDroppingItem(DroppingItemEventArgs ev)
+                        {
+                            if (ev.Player.IsScp || ev.Player.Role.Type.ToString().Contains("Flamingo"))
+                                return;
+
+                            List<ItemType> ItemList = EnumToList<ItemType>();
+                            ItemType Item = ItemList.GetRandomValue();
+
+                            int rand = Random.Range(0, 100);
+
+                            if (rand < 5)
+                                ev.Player.EnableEffect(EffectType.SeveredHands);
+
+                            else
+                            {
+                                ev.Item.Destroy();
+                                Item CurrentItem = ev.Player.AddItem(Item);
+                                ev.Player.DropItem(CurrentItem);
+                            }
+                        }
+
+                        Exiled.Events.Handlers.Player.DroppingItem += OnDroppingItem;
+
+                        yield return Timing.WaitForSeconds(60);
+
+                        Exiled.Events.Handlers.Player.DroppingItem -= OnDroppingItem;
+    }
+
+                    Timing.RunCoroutine(OnEventStarted());
+                }
+            },
+            new Events()
+            {
+                Name = "광장",
+                Description = "2분 간, 유저들의 채팅과 마이크가 모두에게 공유됩니다.",
+                Script = () =>
+                {
+                    IEnumerator<float> OnEventStarted()
+                    {
+                        foreach (var player in Player.List)
+                        {
+                            Server.ExecuteCommand($"/icom {player.Id} 1");
+
+                            IntercomPlayers.Add(player);
+
+                            Timing.CallDelayed(120, () =>
+                            {
+                                Server.ExecuteCommand($"/icom {player.Id} 0");
+
+                                IntercomPlayers.Remove(player);
+                            });
+                        }
+
+                        yield break;
+                    };
+
+                    Timing.RunCoroutine(OnEventStarted());
+                }
+            },
         };
 
         public static Dictionary<Player, int> KillCounts = new Dictionary<Player, int>();

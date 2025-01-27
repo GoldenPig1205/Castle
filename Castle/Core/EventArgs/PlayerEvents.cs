@@ -247,7 +247,7 @@ namespace Castle.Core.EventArgs
                         return "꼭 오우거같이 보이는군요";
                 }
 
-                foreach (var player in Exiled.API.Features.Player.List.Where(x => x.IsDead || Vector3.Distance(x.Position, ev.Player.Position) < 11))
+                foreach (var player in Player.List.Where(x => x.IsDead || Vector3.Distance(x.Position, ev.Player.Position) < 11))
                     player.AddBroadcast(5, $"<size=20>{BadgeFormat(ev.Player)}<color={ev.Player.Role.Color.ToHex()}>{ev.Player.DisplayNickname}</color>(은)는 {emotion()}.</size>");
             }
         }
