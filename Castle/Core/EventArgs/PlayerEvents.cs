@@ -110,47 +110,52 @@ namespace Castle.Core.EventArgs
 
         public static IEnumerator<float> OnDied(DiedEventArgs ev)
         {
-            if (ev.Attacker != null && !ev.Attacker.IsNPC)
+            try
             {
-                if (KillCounts[ev.Player] >= 3)
+                if (ev.Attacker != null && !ev.Attacker.IsNPC)
                 {
-                    int Gratuity = KillCounts[ev.Player] / 3;
+                    if (KillCounts[ev.Player] >= 3)
+                    {
+                        int Gratuity = KillCounts[ev.Player] / 3;
 
-                    ev.Attacker.ShowHint($"<b>검거 완료!</b> <color=#ffd700>${Gratuity}</color>를 포상으로 획득합니다.");
-                    ev.Attacker.AddItem(ItemType.Coin, Gratuity);
+                        ev.Attacker.ShowHint($"<b>검거 완료!</b> <color=#ffd700>${Gratuity}</color>를 포상으로 획득합니다.");
+                        ev.Attacker.AddItem(ItemType.Coin, Gratuity);
+                    }
+                    else if (KillCounts[ev.Player] == 0)
+                    {
+                        KillCounts[ev.Attacker]++;
+
+                        ev.Attacker.ShowHint($"<color=#FF0000>악명</color>이 1 증가했습니다. (총 {KillCounts[ev.Attacker]})");
+                    }
                 }
-                else if (KillCounts[ev.Player] == 0)
+
+                KillCounts[ev.Player] /= 2;
+
+                for (int i = 0; i < 5; i++)
                 {
-                    KillCounts[ev.Attacker]++;
+                    ev.Player.ShowHint($"{5 - i}초 뒤 부활합니다.", 1.2f);
 
-                    ev.Attacker.ShowHint($"<color=#FF0000>악명</color>이 1 증가했습니다. (총 {KillCounts[ev.Attacker]})");
+                    yield return Timing.WaitForSeconds(1);
+                }
+
+                string MessageFormat()
+                {
+                    if (!(ev.Attacker == null || ev.Attacker.IsNPC))
+                        return $"💀 <color=#A4A4A4>자살</color>ㅣ{BadgeFormat(ev.Player)}<color=#F2F5A9>{ev.Player.DisplayNickname}</color>(<color={ev.TargetOldRole.GetColor().ToHex()}>{Trans.Role[ev.TargetOldRole]}</color>) - {ev.DamageHandler.Type}";
+                    else
+                        return $"💔 <color=#FAAC58>{(ev.Player.IsCuffed ? "<b>체포킬</b>(신고 가능 여부는 규칙 확인)" : "사살")}</color>ㅣ{BadgeFormat(ev.Attacker)}<color=#F2F5A9>{ev.Attacker.DisplayNickname}</color>(<color={ev.Attacker.Role.Color.ToHex()}>{Trans.Role[ev.Attacker.Role.Type]}</color>) -> {BadgeFormat(ev.Player)}<color=#F2F5A9>{ev.Player.DisplayNickname}</color>(<color={ev.TargetOldRole.GetColor().ToHex()}>{Trans.Role[ev.TargetOldRole]}</color>) - {ev.DamageHandler.Type}";
+                }
+
+                foreach (var player in Player.List)
+                {
+                    if (player.IsDead || !(ev.Attacker == null || ev.Attacker.IsNPC))
+                        player.AddBroadcast(10, $"<size=20>{MessageFormat()}</size>");
                 }
             }
-
-            KillCounts[ev.Player] /= 2;
-
-            for (int i = 0; i < 5; i++)
+            finally
             {
-                ev.Player.ShowHint($"{5 - i}초 뒤 부활합니다.", 1.2f);
-
-                yield return Timing.WaitForSeconds(1);
-            }
-
-            string MessageFormat()
-            {
-                if (!(ev.Attacker == null || ev.Attacker.IsNPC))
-                    return $"💀 <color=#A4A4A4>자살</color>ㅣ{BadgeFormat(ev.Player)}<color=#F2F5A9>{ev.Player.DisplayNickname}</color>(<color={ev.TargetOldRole.GetColor().ToHex()}>{Trans.Role[ev.TargetOldRole]}</color>) - {ev.DamageHandler.Type}";
-                else
-                    return $"💔 <color=#FAAC58>{(ev.Player.IsCuffed ? "<b>체포킬</b>(신고 가능 여부는 규칙 확인)" : "사살")}</color>ㅣ{BadgeFormat(ev.Attacker)}<color=#F2F5A9>{ev.Attacker.DisplayNickname}</color>(<color={ev.Attacker.Role.Color.ToHex()}>{Trans.Role[ev.Attacker.Role.Type]}</color>) -> {BadgeFormat(ev.Player)}<color=#F2F5A9>{ev.Player.DisplayNickname}</color>(<color={ev.TargetOldRole.GetColor().ToHex()}>{Trans.Role[ev.TargetOldRole]}</color>) - {ev.DamageHandler.Type}";
-            }
-
-            foreach (var player in Player.List)
-            {
-                if (player.IsDead || !(ev.Attacker == null || ev.Attacker.IsNPC))
-                    player.AddBroadcast(10, $"<size=20>{MessageFormat()}</size>");
-            }
-
-            Spawn(ev.Player);
+                Spawn(ev.Player);
+            };
         }
 
         public static void OnInteractingDoor(InteractingDoorEventArgs ev)

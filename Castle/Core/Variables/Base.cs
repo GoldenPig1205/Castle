@@ -248,12 +248,12 @@ namespace Castle.Core.Variables
                                 if (hub.TryGetComponent(out obj))
                                     Object.Destroy(obj);
 
-                                hub.gameObject.AddComponent<PlayerFollower>().Init(target.ReferenceHub, 125f, 1, 30f);
+                                hub.gameObject.AddComponent<PlayerFollower>().Init(target.ReferenceHub, 125f, 1, 20f);
 
                                 if (distance < 4)
                                     owner.EnableEffect(EffectType.Slowness, 20, 2);
 
-                                if (distance < 2) 
+                                if (distance < 1.1f) 
                                 {
                                     var attack = owner.Role.As<Scp0492Role>().AttackAbility;
 
@@ -284,7 +284,15 @@ namespace Castle.Core.Variables
                             zombie.roleManager.ServerSetRole(PlayerRoles.RoleTypeId.Scp0492, PlayerRoles.RoleChangeReason.ItemUsage);
                             zombie.transform.position = new Vector3(Random.Range(-45, 42), 2030, Random.Range(0, 254));
 
-                            Timing.RunCoroutine(onSpawnZombie(zombie));
+                            CoroutineHandle spawn = Timing.RunCoroutine(onSpawnZombie(zombie));
+
+                            Timing.CallDelayed(120, () =>
+                            {
+                                Timing.KillCoroutines(spawn);
+
+                                if (zombie != null)
+                                    NetworkServer.Destroy(zombie.gameObject);
+                            });
 
                             yield return Timing.WaitForSeconds(Random.Range(1, 6));
                         }
