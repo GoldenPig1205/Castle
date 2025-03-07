@@ -153,10 +153,24 @@ namespace Castle.Core.IEnumerators
                             player.ShowHint($"""
 <b><size=60>Welcome to <color=#F5D0A9>만남의 광장</color>!</size></b>
 
-<size=20>[ESC] -> [Server Info]로 이동하여 서버 설명을 읽어보세요.</size>
+<size=20>
+잠시 쉬어가는 곳입니다. 여러 용도로 사용될 수 있는 넓디 넓은 공간이에요.
+여기서 친구들과 만나 개인적인 이야기를 나누거나, 무언가를 공유하거나, 놀거나, 무엇이든 할 수 있어요.
 
+<b>또한, 콘솔(` 또는 ~)을 열고 [.help] 명령어를 입력하여 사용할 수 있는 명령어에 대한 도움말을 확인할 수 있어요.</b>
 
+지루하신가요? 그럼 랜덤한 아이템을 맵 곳곳에 스폰시켜드릴게요.
+또한, 팀킬도 가능합니다. 단, 상대가 <b><color=#F5ECCE>평화 구역</color></b>에 있으면 팀킬이 불가능합니다.
+1시간(실제 시간으로는 3분)마다 맵을 대신 청소해 드립니다. 행운을 빌어요!
 
+[ALT]ㅣ근접 공격
+유저 처치 시, <color=red>악명</color>이 쌓임
+서버에 3명 이상 존재 시, 가끔씩 이벤트 오픈
+닉언, 팀킬 규정에 영향을 받지 않음
+
+Map Create by @punkkk_
+Plugin Create by @goldenpig1205
+</size>
 
 
 """, 1.2f);
